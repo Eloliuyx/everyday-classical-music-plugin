@@ -1,17 +1,16 @@
 import { App, Plugin, PluginSettingTab, Setting, TFile, Notice } from 'obsidian';
 import * as fs from 'fs';
+import * as path from 'path';
 import moment from 'moment';
 
 // Plugin settings interface
 interface MyPluginSettings {
-    jsonFilePath: string;
     backfillExistingNotes: boolean;
     removeLinksBeforeDate: string;
 }
 
 // Default settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
-    jsonFilePath: '/Users/eloliu/Obsidian/Elo\'s Vault/.obsidian/plugins/everyday-classical-music/dailyMusicLinks.json',
     backfillExistingNotes: false,
     removeLinksBeforeDate: ''
 }
@@ -66,30 +65,35 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
     }
 
     async loadJsonData() {
-        const { jsonFilePath } = this.settings;
-        console.log('Loading JSON file from path:', jsonFilePath); // Debug log
-
-        if (jsonFilePath) {
-            try {
-                const absolutePath = require('path').resolve(jsonFilePath);
-                console.log('Absolute JSON file path:', absolutePath); // Debug log
-
-                if (fs.existsSync(absolutePath)) {
-                    const data = fs.readFileSync(absolutePath, 'utf-8');
-                    this.musicData = JSON.parse(data);
-                    console.log('JSON data successfully loaded'); // Debug log
-                } else {
-                    console.error('JSON file does not exist:', absolutePath);
-                    new Notice('JSON file not found.');
-                }
-            } catch (error) {
-                console.error('Error loading JSON data:', error);
-                new Notice('Failed to load JSON data.');
+        try {
+            // Get the base path of the vault
+            const vaultBasePath = (this.app.vault.adapter as any).basePath;
+    
+            // Construct the relative path to your plugin's JSON file
+            const jsonFilePath = path.join(vaultBasePath, '.obsidian', 'plugins', 'everyday-classical-music', 'dailyMusicLinks.json');
+            console.log('Loading JSON file from path:', jsonFilePath); // Debug log
+    
+            // Check if the JSON file exists
+            if (fs.existsSync(jsonFilePath)) {
+                console.log('JSON file exists at path:', jsonFilePath);
+    
+                // Read the JSON file
+                const data = fs.readFileSync(jsonFilePath, 'utf-8');
+                console.log('Raw JSON data:', data); // Debug log
+    
+                // Parse the JSON data
+                this.musicData = JSON.parse(data);
+                console.log('JSON data successfully parsed and loaded'); // Debug log
+            } else {
+                console.error('JSON file does not exist at path:', jsonFilePath);
+                new Notice('JSON file not found.');
             }
-        } else {
-            new Notice('JSON file path is not set.');
+        } catch (error) {
+            console.error('Error during JSON data loading:', error);
+            new Notice('Failed to load JSON data.');
         }
     }
+    
 
     async onFileCreate(file: TFile) {
         const fileCreationTime = moment(file.stat.ctime).valueOf();
