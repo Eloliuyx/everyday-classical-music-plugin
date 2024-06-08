@@ -71,9 +71,17 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
 
         if (jsonFilePath) {
             try {
-                const data = fs.readFileSync(jsonFilePath, 'utf-8');
-                this.musicData = JSON.parse(data);
-                console.log('JSON data successfully loaded'); // Debug log
+                const absolutePath = require('path').resolve(jsonFilePath);
+                console.log('Absolute JSON file path:', absolutePath); // Debug log
+
+                if (fs.existsSync(absolutePath)) {
+                    const data = fs.readFileSync(absolutePath, 'utf-8');
+                    this.musicData = JSON.parse(data);
+                    console.log('JSON data successfully loaded'); // Debug log
+                } else {
+                    console.error('JSON file does not exist:', absolutePath);
+                    new Notice('JSON file not found.');
+                }
             } catch (error) {
                 console.error('Error loading JSON data:', error);
                 new Notice('Failed to load JSON data.');
@@ -120,6 +128,8 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
             const newContent = `${content.slice(0, propertyFieldsEndIndex)}\n\n${quoteBlock}\n${content.slice(propertyFieldsEndIndex).trim()}`;
 
             await this.app.vault.modify(file, newContent);
+        } else {
+            console.warn('No music piece found for date:', `2024-${monthDay}`);
         }
     }
 
