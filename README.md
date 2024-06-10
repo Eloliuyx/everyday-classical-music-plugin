@@ -2,6 +2,8 @@
 
 The **Everyday Classical Music Plugin** for Obsidian introduces a different piece of classical music each day with a YouTube link in your daily notes. They are the first 366 pieces (randomized) recommended by [this document](https://docs.google.com/document/d/18t_9MHZTENbmYdezAAj4LRM0-Eak_MYO1HssZW2FX1U/edit).
 
+This initial release works for apple macOS. 
+
 ## Features (v1.0.0)
 
 - Automatically adds a classical music piece to newly created daily notes.
