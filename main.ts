@@ -1,15 +1,17 @@
 import { App, Plugin, PluginSettingTab, Setting, TFile, Notice } from 'obsidian';
 import * as fs from 'fs';
-import * as path from 'path';
 import moment from 'moment';
 
-// Plugin settings interface and default settings
+// Plugin settings interface
 interface MyPluginSettings {
+    jsonFilePath: string;
     backfillExistingNotes: boolean;
     removeLinksBeforeDate: string;
 }
 
+// Default settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
+    jsonFilePath: '/Users/eloliu/Obsidian/Elo\'s Vault/.obsidian/plugins/everyday-classical-music/dailyMusicLinks.json',
     backfillExistingNotes: false,
     removeLinksBeforeDate: ''
 }
@@ -29,9 +31,6 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
 
     async onload() {
         console.log('Loading Everyday Classical Music Plugin');
-        this.addRibbonIcon('dice', 'Greet', () => {
-            new Notice('Enhance your daily notes with the timeless elegance of classical music. Have a great day with the company of beautiful melodies!');
-          });
 
         // Load settings
         await this.loadSettings();
@@ -67,32 +66,20 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
     }
 
     async loadJsonData() {
-        try {
-            // Get the base path of the vault
-            const vaultBasePath = (this.app.vault.adapter as any).basePath;
-    
-            // Construct the relative path to your plugin's JSON file
-            const jsonFilePath = path.join(vaultBasePath, '.obsidian', 'plugins', 'everyday-classical-music', 'dailyMusicLinks.json');
-            console.log('Loading JSON file from path:', jsonFilePath); // Debug log
-    
-            // Check if the JSON file exists
-            if (fs.existsSync(jsonFilePath)) {
-                console.log('JSON file exists at path:', jsonFilePath);
-    
-                // Read the JSON file
+        const { jsonFilePath } = this.settings;
+        console.log('Loading JSON file from path:', jsonFilePath); // Debug log
+
+        if (jsonFilePath) {
+            try {
                 const data = fs.readFileSync(jsonFilePath, 'utf-8');
-                console.log('Raw JSON data:', data); // Debug log
-    
-                // Parse the JSON data
                 this.musicData = JSON.parse(data);
-                console.log('JSON data successfully parsed and loaded'); // Debug log
-            } else {
-                console.error('JSON file does not exist at path:', jsonFilePath);
-                new Notice('JSON file not found.');
+                console.log('JSON data successfully loaded'); // Debug log
+            } catch (error) {
+                console.error('Error loading JSON data:', error);
+                new Notice('Failed to load JSON data.');
             }
-        } catch (error) {
-            console.error('Error during JSON data loading:', error);
-            new Notice('Failed to load JSON data.');
+        } else {
+            new Notice('JSON file path is not set.');
         }
     }
 
@@ -133,8 +120,6 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
             const newContent = `${content.slice(0, propertyFieldsEndIndex)}\n\n${quoteBlock}\n${content.slice(propertyFieldsEndIndex).trim()}`;
 
             await this.app.vault.modify(file, newContent);
-        } else {
-            console.warn('No music piece found for date:', `2024-${monthDay}`);
         }
     }
 
