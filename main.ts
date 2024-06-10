@@ -1,19 +1,20 @@
 import { App, Plugin, PluginSettingTab, Setting, TFile, Notice } from 'obsidian';
 import * as fs from 'fs';
+import * as path from 'path';
 import moment from 'moment';
 
 // Plugin settings interface
 interface MyPluginSettings {
-    jsonFilePath: string;
     backfillExistingNotes: boolean;
     removeLinksBeforeDate: string;
+    jsonFilePath: string; // Add this line
 }
 
 // Default settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
-    jsonFilePath: '/Users/eloliu/Obsidian/Elo\'s Vault/.obsidian/plugins/everyday-classical-music/dailyMusicLinks.json',
     backfillExistingNotes: false,
-    removeLinksBeforeDate: ''
+    removeLinksBeforeDate: '',
+    jsonFilePath: '.obsidian/plugins/everyday-classical-music/dailyMusicLinks.json' // Add this line
 }
 
 // Define the structure of the JSON data
@@ -31,6 +32,10 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
 
     async onload() {
         console.log('Loading Everyday Classical Music Plugin');
+
+        this.addRibbonIcon('dice', 'Greet', () => {
+            new Notice('Hello, world!');
+        });
 
         // Load settings
         await this.loadSettings();
@@ -66,23 +71,35 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
     }
 
     async loadJsonData() {
-        const { jsonFilePath } = this.settings;
-        console.log('Loading JSON file from path:', jsonFilePath); // Debug log
-
-        if (jsonFilePath) {
-            try {
+        try {
+            // Get the base path of the vault
+            const vaultBasePath = (this.app.vault.adapter as any).basePath;
+    
+            // Construct the full path to the JSON file using the setting
+            const jsonFilePath = path.join(vaultBasePath, this.settings.jsonFilePath);
+            console.log('Loading JSON file from path:', jsonFilePath); // Debug log
+    
+            // Check if the JSON file exists
+            if (fs.existsSync(jsonFilePath)) {
+                console.log('JSON file exists at path:', jsonFilePath);
+    
+                // Read the JSON file
                 const data = fs.readFileSync(jsonFilePath, 'utf-8');
+                console.log('Raw JSON data:', data); // Debug log
+    
+                // Parse the JSON data
                 this.musicData = JSON.parse(data);
-                console.log('JSON data successfully loaded'); // Debug log
-            } catch (error) {
-                console.error('Error loading JSON data:', error);
-                new Notice('Failed to load JSON data.');
+                console.log('JSON data successfully parsed and loaded'); // Debug log
+            } else {
+                console.error('JSON file does not exist at path:', jsonFilePath);
+                new Notice('JSON file not found.');
             }
-        } else {
-            new Notice('JSON file path is not set.');
+        } catch (error) {
+            console.error('Error during JSON data loading:', error);
+            new Notice('Failed to load JSON data.');
         }
     }
-
+    
     async onFileCreate(file: TFile) {
         const fileCreationTime = moment(file.stat.ctime).valueOf();
         if (this.isDailyNoteFile(file) && fileCreationTime >= this.pluginEnabledTimestamp) {
@@ -120,6 +137,8 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
             const newContent = `${content.slice(0, propertyFieldsEndIndex)}\n\n${quoteBlock}\n${content.slice(propertyFieldsEndIndex).trim()}`;
 
             await this.app.vault.modify(file, newContent);
+        } else {
+            console.warn('No music piece found for date:', `2024-${monthDay}`);
         }
     }
 
@@ -199,6 +218,18 @@ class MyPluginSettingTab extends PluginSettingTab {
                         }
                     });
             });
+
+        new Setting(containerEl)
+            .setName('Path to dailyMusicLinks.json')
+            .setDesc('Set the path to the dailyMusicLinks.json file')
+            .addText(text => text
+                .setPlaceholder('Path to dailyMusicLinks.json')
+                .setValue(this.plugin.settings.jsonFilePath)
+                .onChange(async (value) => {
+                    this.plugin.settings.jsonFilePath = value;
+                    await this.plugin.saveSettings();
+                    await this.plugin.loadJsonData(); // Reload JSON data when the path changes
+                }));
 
         // Add "Feed the Markhor" button
         const buttonDiv = containerEl.createDiv({ cls: 'ko-fi-button-container' });
