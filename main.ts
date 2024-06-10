@@ -34,7 +34,7 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
         console.log('Loading Everyday Classical Music Plugin');
 
         this.addRibbonIcon('dice', 'Greet', () => {
-            new Notice('Hello, world!');
+            new Notice('Enhance your daily notes with the timeless elegance of classical music. Have a great day with the company of beautiful melodies!');
         });
 
         // Load settings
