@@ -3,13 +3,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import moment from 'moment';
 
-// Plugin settings interface
+// Plugin settings interface and default settings
 interface MyPluginSettings {
     backfillExistingNotes: boolean;
     removeLinksBeforeDate: string;
 }
 
-// Default settings
 const DEFAULT_SETTINGS: MyPluginSettings = {
     backfillExistingNotes: false,
     removeLinksBeforeDate: ''
@@ -30,6 +29,9 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
 
     async onload() {
         console.log('Loading Everyday Classical Music Plugin');
+        this.addRibbonIcon('dice', 'Greet', () => {
+            new Notice('Enhance your daily notes with the timeless elegance of classical music. Have a great day with the company of beautiful melodies!');
+          });
 
         // Load settings
         await this.loadSettings();
@@ -93,7 +95,6 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
             new Notice('Failed to load JSON data.');
         }
     }
-    
 
     async onFileCreate(file: TFile) {
         const fileCreationTime = moment(file.stat.ctime).valueOf();
