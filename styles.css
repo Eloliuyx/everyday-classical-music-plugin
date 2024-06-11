@@ -1,8 +1,14 @@
-/*
+.ko-fi-button-container {
+    text-align: center;
+    margin-top: 20px;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
-*/
+.ko-fi-button {
+    background-color: #FFD6C0;
+    color: #343434;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}

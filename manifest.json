@@ -6,6 +6,7 @@
 	"description": "Display a different piece of classical music each day with a YouTube link in your daily note.",
 	"author": "the flying markhor",  
 	"authorUrl": "https://flyingmarkhor.com",
-	"isDesktopOnly": false	
+	"isDesktopOnly": false,	
+	"css": "styles.css"
 }
             

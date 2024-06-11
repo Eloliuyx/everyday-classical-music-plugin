@@ -4,17 +4,17 @@ import * as path from 'path';
 import moment from 'moment';
 
 // Plugin settings interface
-interface MyPluginSettings {
+interface EverydayClassicalMusicSettings {
     backfillExistingNotes: boolean;
     removeLinksBeforeDate: string;
-    jsonFilePath: string; // Add this line
+    jsonFilePath: string;
 }
 
 // Default settings
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: EverydayClassicalMusicSettings = {
     backfillExistingNotes: false,
     removeLinksBeforeDate: '',
-    jsonFilePath: '.obsidian/plugins/everyday-classical-music/dailyMusicLinks.json' // Add this line
+    jsonFilePath: '.obsidian/plugins/everyday-classical-music/dailyMusicLinks.json'
 }
 
 // Define the structure of the JSON data
@@ -26,16 +26,12 @@ interface MusicPiece {
 
 // Main plugin class
 export default class EverydayClassicalMusicPlugin extends Plugin {
-    settings: MyPluginSettings;
+    settings: EverydayClassicalMusicSettings;
     musicData: Record<string, MusicPiece> = {};
     pluginEnabledTimestamp: number;
 
     async onload() {
         console.log('Loading Everyday Classical Music Plugin');
-
-        this.addRibbonIcon('dice', 'Greet', () => {
-            new Notice('Enhance your daily notes with the timeless elegance of classical music. Have a great day with the company of beautiful melodies!');
-        });
 
         // Load settings
         await this.loadSettings();
@@ -55,7 +51,7 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
         }
 
         // Add settings tab
-        this.addSettingTab(new MyPluginSettingTab(this.app, this));
+        this.addSettingTab(new EverydayClassicalMusicSettingTab(this.app, this));
     }
 
     onunload() {
@@ -99,7 +95,7 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
             new Notice('Failed to load JSON data.');
         }
     }
-    
+
     async onFileCreate(file: TFile) {
         const fileCreationTime = moment(file.stat.ctime).valueOf();
         if (this.isDailyNoteFile(file) && fileCreationTime >= this.pluginEnabledTimestamp) {
@@ -167,7 +163,7 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
 }
 
 // Plugin settings tab
-class MyPluginSettingTab extends PluginSettingTab {
+class EverydayClassicalMusicSettingTab extends PluginSettingTab {
     plugin: EverydayClassicalMusicPlugin;
 
     constructor(app: App, plugin: EverydayClassicalMusicPlugin) {
@@ -233,17 +229,8 @@ class MyPluginSettingTab extends PluginSettingTab {
 
         // Add "Feed the Markhor" button
         const buttonDiv = containerEl.createDiv({ cls: 'ko-fi-button-container' });
-        buttonDiv.style.textAlign = 'center';
-        buttonDiv.style.marginTop = '20px';
 
-        const koFiButton = buttonDiv.createEl('button', { text: 'Feed the Markhor 🦌🪽' });
-        koFiButton.style.backgroundColor = '#FFD6C0'; 
-        koFiButton.style.color = '#343434';
-        koFiButton.style.border = 'none';
-        koFiButton.style.padding = '10px 20px';
-        koFiButton.style.fontSize = '16px';
-        koFiButton.style.borderRadius = '5px';
-        koFiButton.style.cursor = 'pointer';
+        const koFiButton = buttonDiv.createEl('button', { text: 'Feed the Markhor 🦌🪽', cls: 'ko-fi-button' });
 
         koFiButton.onclick = () => {
             window.open('https://ko-fi.com/flyingmarkhor', '_blank');
