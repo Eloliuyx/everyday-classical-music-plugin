@@ -2,7 +2,6 @@
 
 The **Everyday Classical Music Plugin** for Obsidian introduces a different piece of classical music each day with a YouTube link in your daily notes. They are the first 366 pieces (randomized) recommended by [this document](https://docs.google.com/document/d/18t_9MHZTENbmYdezAAj4LRM0-Eak_MYO1HssZW2FX1U/edit).
 
-This initial release was tested on Apple macOS. For Windows users, you may need to adjust the location of the dailyMusicLinks.json file in the settings.
 
 ## Features (v1.0.0)
 
@@ -33,7 +32,7 @@ This initial release was tested on Apple macOS. For Windows users, you may need 
     - Copy the following files to your Obsidian plugins directory (yourVault/.obsidian/plugins/)
         - main.js
         - manifest.json
-        - dailyMusicLinks.json
+        - styles.css
     - Enable the plugin in Obsidian settings.
 
 ## Usage
@@ -53,22 +52,3 @@ By default, the plugin only adds music links to newly created daily notes. Exist
 
 - **Feed the Markhor:**
   - Click the "Feed the Markhor 🦌🪽" button to support the plugin developer on Ko-fi.
-
-## JSON Data File
-
-The plugin uses a JSON file to fetch music pieces. If you would like to use your own music data source, ensure your JSON file includes all dates for the year 2024. Here’s an example format:
-
-```json
-{
-    "2024-01-01": {
-        "name": "Symphonic Études, op. 13",
-        "author": "Schumann",
-        "link": "https://www.youtube.com/watch?v=CIWBd7-AP4Q"
-    },
-    "2024-01-02": {
-        "name": "Nocturnes",
-        "author": "Fauré",
-        "link": "https://www.youtube.com/watch?v=sqw5B9B9j4M"
-    }
-    // Add other dates...
-}
