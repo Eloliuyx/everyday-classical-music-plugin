@@ -1968,7 +1968,7 @@ class EverydayClassicalMusicSettingTab extends PluginSettingTab {
         containerEl.empty();
 
         new Setting(containerEl)
-            .setName('Backfill Existing Notes')
+            .setName('Backfill existing notes')
             .setDesc('If enabled, backfill all existing daily notes with classical music suggestions')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.backfillExistingNotes)
@@ -1981,7 +1981,7 @@ class EverydayClassicalMusicSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Remove Links Before Date')
+            .setName('Remove links before date')
             .setDesc('Select a date to remove all the links added before this date')
             .addText(text => text
                 .setPlaceholder('YYYY-MM-DD')
@@ -1993,7 +1993,7 @@ class EverydayClassicalMusicSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .addButton(button => {
-                button.setButtonText('Remove Links')
+                button.setButtonText('Remove links')
                     .setCta()
                     .onClick(async () => {
                         const cutoffDate = this.plugin.settings.removeLinksBeforeDate;
