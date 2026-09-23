@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Underline **Feed the Markhor** while hovered or pressed.
+
 - Place **Feed the Markhor** in a separate, unboxed footer below the gray settings area in Obsidian 1.13+. Keep the original standalone footer on older versions.
 
 ## 1.1.2 — 2026-09-23
