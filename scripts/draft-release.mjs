@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { setTimeout } from 'node:timers/promises';
 
 const version = process.env.RELEASE_VERSION;
 const repository = process.env.GITHUB_REPOSITORY;
@@ -26,7 +27,13 @@ if (release) {
 }
 
 // Check again immediately before replacing any draft assets.
-const current = findRelease();
+let current = findRelease();
+// A newly created draft can take a few seconds to appear in the listing.
+// Retry only a missing result; API failures and published releases still stop the run.
+for (let attempt = 0; !current && attempt < 5; attempt++) {
+    await setTimeout(1000 * (attempt + 1));
+    current = findRelease();
+}
 assert.equal(current?.draft, true, 'Refusing to change assets unless this release is a draft.');
 gh(['release', 'upload', version, '--repo', repository, '--clobber',
     'release-assets/main.js', 'release-assets/manifest.json', 'release-assets/styles.css']);

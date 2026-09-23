@@ -54,7 +54,7 @@ test('release staging requires release notes and every installable file', async 
     assert.equal(existsSync(join(root, 'release-assets')), false);
 });
 
-for (const scenario of ['published', 'unavailable', 'missing', 'draft']) {
+for (const scenario of ['published', 'unavailable', 'missing', 'draft', 'delayed']) {
     test(`draft uploader handles ${scenario} releases without touching published assets`, t => {
         const { root } = fixture(t);
         const bin = join(root, 'bin');
@@ -69,7 +69,8 @@ if (args[0] === 'api') {
     const state = process.env.TEST_SCENARIO;
     if (state === 'unavailable') { console.error('HTTP 503'); process.exit(1); }
     if (!args.includes('repos/test/repo/releases?per_page=100') || !args.includes('--paginate') || !args.includes('--slurp')) { console.error('HTTP 404'); process.exit(1); }
-    if (state === 'missing' && !fs.existsSync(process.env.TEST_CREATED)) { console.log('[[]]'); process.exit(0); }
+    if (['missing', 'delayed'].includes(state) && !fs.existsSync(process.env.TEST_CREATED)) { console.log('[[]]'); process.exit(0); }
+    if (state === 'delayed' && !fs.existsSync(process.env.TEST_CREATED + '.lag')) { fs.writeFileSync(process.env.TEST_CREATED + '.lag', 'yes'); console.log('[[]]'); process.exit(0); }
     console.log(JSON.stringify([[], [{ tag_name: '1.1.0', draft: state !== 'published' }]]));
 } else if (args[0] === 'release' && args[1] === 'create') {
     fs.writeFileSync(process.env.TEST_CREATED, 'yes');
@@ -89,7 +90,7 @@ if (args[0] === 'api') {
         } else {
             assert.equal(result.status, 0, result.stderr);
             assert.equal(calls.filter(args => args[0] === 'release' && args[1] === 'upload').length, 1);
-            assert.ok(calls.find(args => args[0] === 'release' && args[1] === (scenario === 'missing' ? 'create' : 'edit')).includes('--draft'));
+            assert.ok(calls.find(args => args[0] === 'release' && args[1] === (['missing', 'delayed'].includes(scenario) ? 'create' : 'edit')).includes('--draft'));
         }
     });
 }
