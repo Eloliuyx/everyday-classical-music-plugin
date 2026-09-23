@@ -2,6 +2,10 @@
 
 Bug reports, documentation improvements, and corrections to unavailable recordings are welcome. Use [GitHub issues](https://github.com/Eloliuyx/everyday-classical-music-plugin/issues) or open a pull request.
 
+## Manual installation
+
+Download `main.js`, `manifest.json`, and `styles.css` from a [published release](https://github.com/Eloliuyx/everyday-classical-music-plugin/releases). Put all three files inside `yourVault/.obsidian/plugins/everyday-classical-music/`, reload Obsidian, and enable the plugin under Community plugins.
+
 ## Development
 
 Use Node.js 22 LTS and npm. From a clone of this repository:
@@ -59,3 +63,15 @@ This command makes network requests and can take several minutes. Review uncerta
 6. Merge the release source to `main` and publish the reviewed draft as the latest release. Retain the attested assets unchanged. The community directory checks published releases; draft releases are not an Obsidian update.
 
 If the built files need changes, commit the fix and use a new version tag instead of moving a tag that already produced attestations. No signing keys or personal access token are needed in repository secrets: the workflow uses GitHub’s short-lived credentials.
+
+## Release verification
+
+The release workflow builds from a version tag, runs automated checks, and generates GitHub artifact attestations for `main.js`, `manifest.json`, and `styles.css` before attaching those same files to a draft release. This workflow is introduced with 1.1.2; older releases do not have these attestations.
+
+After downloading a file from a release, its provenance can be checked with the [GitHub CLI](https://cli.github.com/manual/gh_attestation_verify), for example:
+
+```sh
+gh attestation verify main.js --repo Eloliuyx/everyday-classical-music-plugin
+```
+
+An attestation establishes where and how a file was built. It is not a malware scan or a network-behavior scan. If the community scorecard says either scan is unavailable, that is not a completed scan and cannot be resolved by changing this plugin’s disclosures. Scorecard results update after the directory reviews a published release.
