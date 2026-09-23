@@ -1,26 +1,20 @@
 # Changelog
 
-## Unreleased
+## 1.1.2 — 2026-09-23
 
-- Restore the centered, standalone Feed the Markhor footer shown in the original settings page, without the additional support heading or description. Keep settings search, the donation link, and keyboard focus visibility.
-
-## 1.1.1 — 2026-09-23
-
-- Add searchable setting definitions for Obsidian 1.13+, with English and Chinese search aliases. Keep the legacy settings page for older versions; both use the same controls and actions. Search indexing does not read or write notes.
-- Pin the development-only Obsidian API definitions to 1.13.1 to type-check the new settings interface. The plugin’s minimum app version is unchanged.
-- Replace the build-only `builtin-modules` dependency with Node.js's built-in module list. The generated plugin is byte-for-byte unchanged by this replacement.
+- Replace the persistent backfill toggle with a **Backfill now** button. Backfill runs only when clicked; startup, restart, and upgrades do not add music to existing notes, even when an older installation saved the toggle as enabled.
+- Keep automatic music insertion for newly created daily notes after the vault finishes loading. Preserve existing music blocks and their original links.
+- Add settings search for Obsidian 1.13+, including English and Chinese aliases. Keep the settings page available in older versions.
+- Preserve frontmatter, note text, and whitespace when inserting music. Skip unclosed frontmatter, report per-note backfill results, prevent duplicate writes, and handle asynchronous errors. Cleanup supports both LF and CRLF line endings.
+- Keep **Feed the Markhor** centered below the settings, with the original standalone appearance and donation link.
 - Replace the inactive author website with the author's GitHub profile.
-- Replace the persistent backfill toggle with a manual **Backfill now** button. Previously saved backfill flags are ignored; startup and upgrades never trigger backfill.
-- Register new-note handling after the vault finishes loading, and handle initialization, note-writing, settings-saving, and cleanup errors.
-- Report backfill results, continue after individual failures, and prevent overlapping backfill runs and duplicate writes to the same note.
-- Preserve existing music blocks and note text, including whitespace; insert correctly when frontmatter is absent, and leave unclosed frontmatter untouched. Link removal supports both LF and CRLF line endings.
+- Document network and vault access, add contribution and testing instructions, and remove the unnecessary build-only builtin-modules dependency.
+- Build releases in GitHub Actions and provide provenance attestations for main.js, manifest.json, and styles.css.
+- Preserve all 366 works, date mappings, and music URLs from 1.0.1. The plugin ID and minimum app version are unchanged.
 
-- Document local data use, user-triggered external links, and the vault enumeration needed for manual backfill and cleanup.
-- Add a contribution guide, a disposable test-vault generator, and automated lint/test/build checks.
-- Build tagged releases in GitHub Actions and attach provenance attestations to all three installable files. Releases are created as drafts for review before publication.
-- Keep all 366 musical works, date mappings, and URLs unchanged from 1.0.1.
+Validation: 38 automated tests, lint, and production build pass. The maintainer completed testing in a separate Obsidian 1.13.7 vault, including the restored footer. The main.js and styles.css files match that tested build byte for byte.
 
-The 1.1.0 tag was an unpublished packaging attempt. Its release upload failed; 1.1.1 corrects draft-release lookup and contains the maintenance changes above.
+Versions 1.1.0 and 1.1.1 were unpublished preparation builds.
 
 ## 1.0.1 — 2026-09-23
 

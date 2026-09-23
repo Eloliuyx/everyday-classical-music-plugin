@@ -52,7 +52,7 @@ The repository also contains a maintainer-only YouTube audit script. It contacts
 
 ## Release verification
 
-The release workflow builds from a version tag, runs automated checks, and generates GitHub artifact attestations for `main.js`, `manifest.json`, and `styles.css` before attaching those same files to a draft release. This workflow is introduced with 1.1.1; older releases do not have these attestations.
+The release workflow builds from a version tag, runs automated checks, and generates GitHub artifact attestations for `main.js`, `manifest.json`, and `styles.css` before attaching those same files to a draft release. This workflow is introduced with 1.1.2; older releases do not have these attestations.
 
 After downloading a file from a release, its provenance can be checked with the [GitHub CLI](https://cli.github.com/manual/gh_attestation_verify), for example:
 
