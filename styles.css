@@ -1,9 +1,23 @@
-.setting-item.everyday-classical-music-support {
+.setting-group + .everyday-classical-music-support-group {
+    margin-top: 0;
+}
+
+.everyday-classical-music-support-group > .setting-items {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.setting-group .setting-item.everyday-classical-music-support {
     display: block;
     padding: 0;
     border: 0;
     background: transparent;
     box-shadow: none;
+}
+
+.setting-group .setting-item.everyday-classical-music-support::before {
+    display: none;
 }
 
 .everyday-classical-music-support .setting-item-info {

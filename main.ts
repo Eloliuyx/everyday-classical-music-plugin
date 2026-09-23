@@ -1,5 +1,6 @@
 import { App, Plugin, PluginSettingTab, Setting, TFile, Notice, ButtonComponent } from 'obsidian';
 import { moment } from "obsidian";
+import type { SettingDefinitionGroup } from 'obsidian';
 
 // Plugin settings interface
 interface EverydayClassicalMusicSettings {
@@ -2032,7 +2033,26 @@ class EverydayClassicalMusicSettingTab extends PluginSettingTab {
 
     // Obsidian 1.13+ indexes these names and aliases without rendering controls.
     // Keep this method free of side effects: indexing must never write notes.
-    getSettingDefinitions() {
+    getSettingDefinitions(): SettingDefinitionGroup[] {
+        return [
+            {
+                type: 'group',
+                items: this.getNoteSettingDefinitions()
+            },
+            {
+                type: 'group',
+                cls: 'everyday-classical-music-support-group',
+                items: [{
+                    name: 'Support development',
+                    desc: 'Open the author’s Ko-fi page to support the plugin.',
+                    aliases: ['Feed the Markhor', 'Ko-fi', 'donate', '赞助', '支持开发'],
+                    render: (setting: Setting): void => this.renderSupport(setting)
+                }]
+            }
+        ];
+    }
+
+    private getNoteSettingDefinitions() {
         return [
             {
                 name: 'Backfill existing notes',
@@ -2051,12 +2071,6 @@ class EverydayClassicalMusicSettingTab extends PluginSettingTab {
                 desc: 'Remove music blocks from notes dated before the selected cutoff date.',
                 aliases: ['Remove links', 'cleanup', '删除音乐', '删除链接', '清理'],
                 render: (setting: Setting): void => this.renderRemoveLinks(setting)
-            },
-            {
-                name: 'Support development',
-                desc: 'Open the author’s Ko-fi page to support the plugin.',
-                aliases: ['Feed the Markhor', 'Ko-fi', 'donate', '赞助', '支持开发'],
-                render: (setting: Setting): void => this.renderSupport(setting)
             }
         ];
     }
@@ -2065,12 +2079,13 @@ class EverydayClassicalMusicSettingTab extends PluginSettingTab {
     // control renderers so both interfaces keep identical behavior.
     display(): void {
         this.containerEl.empty();
-        for (const definition of this.getSettingDefinitions()) {
+        for (const definition of this.getNoteSettingDefinitions()) {
             const setting = new Setting(this.containerEl)
                 .setName(definition.name)
                 .setDesc(definition.desc);
             definition.render(setting);
         }
+        this.renderSupportButton(this.containerEl.createDiv({ cls: 'everyday-classical-music-support' }));
     }
 
     private async runBackfill(): Promise<void> {
@@ -2130,9 +2145,13 @@ class EverydayClassicalMusicSettingTab extends PluginSettingTab {
     }
 
     private renderSupport(setting: Setting): void {
-        // Keep the searchable definition, but display the support link as a centered footer.
+        // A separate, unboxed group keeps this searchable footer outside the notes settings.
         setting.setClass('everyday-classical-music-support');
-        const buttonDiv = setting.controlEl.createDiv({ cls: 'ko-fi-button-container' });
+        this.renderSupportButton(setting.controlEl);
+    }
+
+    private renderSupportButton(containerEl: HTMLElement): void {
+        const buttonDiv = containerEl.createDiv({ cls: 'ko-fi-button-container' });
         const koFiButton = buttonDiv.createEl('button', { text: 'Feed the Markhor 🦌🪽', cls: 'ko-fi-button' });
         koFiButton.onclick = () => {
             window.open('https://ko-fi.com/flyingmarkhor', '_blank');

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Place **Feed the Markhor** in a separate, unboxed footer below the gray settings area in Obsidian 1.13+. Keep the original standalone footer on older versions.
+
 ## 1.1.2 — 2026-09-23
 
 - Replace the persistent backfill toggle with a **Backfill now** button. Backfill runs only when clicked; startup, restart, and upgrades do not add music to existing notes, even when an older installation saved the toggle as enabled.

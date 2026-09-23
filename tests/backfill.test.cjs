@@ -51,17 +51,20 @@ function harness({ notes = {}, saved = {}, loadError = null, loadPromise = null,
         setValue(value) { this.value = value; return this; }
         onChange(callback) { this.callback = callback; return this; }
     }
-    function createContainer() {
+    function createContainer(options = {}, parentElement = null) {
         return {
-            rows: [], children: [],
+            ...options, parentElement, rows: [], children: [],
+            contains(element) {
+                return this === element || this.children.some(child => child === element || child.contains?.(element));
+            },
             empty() { this.rows = []; this.children = []; },
-            createDiv() {
-                const child = createContainer();
+            createDiv(options) {
+                const child = createContainer(options, this);
                 this.children.push(child);
                 return child;
             },
             createEl(tag, options) {
-                const element = { tag, ...options };
+                const element = { tag, ...options, parentElement: this };
                 this.children.push(element);
                 state.elements.push(element);
                 return element;
@@ -71,9 +74,10 @@ function harness({ notes = {}, saved = {}, loadError = null, loadPromise = null,
     class Setting {
         constructor(container) {
             container.rows.push(this);
-            this.controlEl = createContainer();
+            this.settingEl = container.createDiv({ cls: 'setting-item' });
+            this.controlEl = this.settingEl.createDiv({ cls: 'setting-item-control' });
         }
-        setClass(name) { this.className = name; return this; }
+        setClass(name) { this.className = name; this.settingEl.cls += ` ${name}`; return this; }
         setName(name) { this.name = name; return this; }
         setDesc(description) { this.description = description; return this; }
         addButton(callback) { this.button = new Button(); callback(this.button); return this; }
@@ -160,11 +164,18 @@ function harness({ notes = {}, saved = {}, loadError = null, loadPromise = null,
             if (declarative) {
                 // Model the documented 1.13+ host: definitions bypass display().
                 tab.containerEl.empty();
-                for (const definition of tab.getSettingDefinitions()) {
-                    const row = new Setting(tab.containerEl)
-                        .setName(definition.name).setDesc(definition.desc);
-                    definition.render(row, {});
+                const rows = [];
+                for (const groupDefinition of tab.getSettingDefinitions()) {
+                    const groupEl = tab.containerEl.createDiv({ cls: `setting-group ${groupDefinition.cls || ''}` });
+                    const listEl = groupEl.createDiv({ cls: 'setting-items' });
+                    for (const definition of groupDefinition.items) {
+                        const row = new Setting(listEl)
+                            .setName(definition.name).setDesc(definition.desc);
+                        definition.render(row, { listEl });
+                        rows.push(row);
+                    }
                 }
+                return rows;
             } else {
                 // The legacy host exposes no new settings APIs.
                 tab.display();
@@ -444,7 +455,7 @@ test('modern search indexing exposes useful English/Chinese terms without render
         saved: { backfillExistingNotes: true, removeLinksBeforeDate: '2027-01-01' },
     });
     const tab = await env.start();
-    const definitions = env.state.indexedDefinitions;
+    const definitions = env.state.indexedDefinitions.flatMap(group => group.items);
     assert.ok(definitions.find(row => row.name === 'Backfill existing notes' && row.aliases.includes('补填')));
     assert.ok(definitions.find(row => row.name === 'Remove music links' && row.aliases.includes('删除音乐')));
     assert.ok(definitions.find(row => row.name === 'Remove links before date' && row.aliases.includes('截止日期')));
@@ -516,5 +527,37 @@ for (const declarative of [false, true]) {
         assert.ok(button);
         button.onclick();
         assert.deepEqual(env.state.openedUrls, [['https://ko-fi.com/flyingmarkhor', '_blank']]);
+    });
+}
+
+// Check containment, not just row styles: a transparent row inside the notes
+// group still inherits the gray card behind it (the reported regression).
+for (const declarative of [false, true]) {
+    test(`support footer stays outside note controls on reopening ${declarative ? 'modern' : 'legacy'} settings`, async () => {
+        const env = harness({ declarative });
+        const tab = await env.start();
+        for (let opening = 0; opening < 2; opening++) {
+            const rows = env.showSettings();
+            const page = tab.containerEl;
+            const footer = page.children.at(-1);
+            const visibleButtons = env.state.elements.filter(element =>
+                element.text === 'Feed the Markhor 🦌🪽' && page.contains(element));
+            assert.equal(visibleButtons.length, 1);
+            assert.ok(footer.contains(visibleButtons[0]));
+            for (const row of rows.filter(row => row.name !== 'Support development')) {
+                assert.ok(page.contains(row.settingEl));
+                assert.equal(footer.contains(row.settingEl), false);
+                assert.equal(row.settingEl.contains(visibleButtons[0]), false);
+            }
+            if (declarative) {
+                assert.equal(page.children.length, 2);
+                assert.equal(page.children[0].contains(visibleButtons[0]), false);
+                assert.match(footer.cls, /everyday-classical-music-support-group/);
+            } else {
+                assert.equal(footer.cls, 'everyday-classical-music-support');
+            }
+            assert.deepEqual(env.state.writes, []);
+            assert.deepEqual(env.state.openedUrls, []);
+        }
     });
 }
