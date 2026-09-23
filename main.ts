@@ -290,7 +290,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "02-23": {
         "name": "Symphony #6 in A minor",
         "author": "Mahler",
-        "link": "https://www.youtube.com/watch?v=MjzfXeRYNGo"
+        "link": "https://www.youtube.com/watch?v=VN5aG4kmdTs"
     },
     "02-24": {
         "name": "Pictures at an Exhibition",
@@ -315,7 +315,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "02-28": {
         "name": "Symphony #7 in E, WAB 107",
         "author": "Bruckner",
-        "link": "https://www.youtube.com/watch?v=Hq7VTOW6r6g"
+        "link": "https://www.youtube.com/watch?v=q0XIT_za_E4"
     },
     "02-29": {
         "name": "Suite Bergamasque, L 75, including 'Clair de lune'",
@@ -425,7 +425,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "03-21": {
         "name": "Missa Solemnis in D, op. 123",
         "author": "Beethoven",
-        "link": "https://www.youtube.com/watch?v=umXYWd25hgQ"
+        "link": "https://www.youtube.com/watch?v=hnrFUFVcDmc"
     },
     "03-22": {
         "name": "Symphony #41 in C, K. 551 'Jupiter'",
@@ -450,7 +450,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "03-26": {
         "name": "Symphony #4 in B-flat, op. 60",
         "author": "Beethoven",
-        "link": "https://www.youtube.com/watch?v=V1WqJFilxDg"
+        "link": "https://www.youtube.com/watch?v=uGWklkORHJo"
     },
     "03-27": {
         "name": "Requiem (Missa pro defunctis)",
@@ -740,7 +740,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "05-23": {
         "name": "Symphony #5 in D minor, op. 47",
         "author": "Shostakovich",
-        "link": "https://www.youtube.com/watch?v=9AQMA0XLuAo"
+        "link": "https://www.youtube.com/watch?v=cg0M4LzEITQ"
     },
     "05-24": {
         "name": "Brandenburg Concertos, BWV 1046-1051",
@@ -820,7 +820,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "06-08": {
         "name": "Concerti Grossi (12), op. 6",
         "author": "Corelli",
-        "link": "https://www.youtube.com/watch?v=UNsrdjzLrzM"
+        "link": "https://www.youtube.com/watch?v=pLSCaSUhaEU"
     },
     "06-09": {
         "name": "Aida",
@@ -865,7 +865,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "06-17": {
         "name": "Das Lied von der Erde",
         "author": "Mahler",
-        "link": "https://www.youtube.com/watch?v=Npy4gjZ81F0"
+        "link": "https://www.youtube.com/watch?v=R81yPON9IHI"
     },
     "06-18": {
         "name": "Preludes and Fugues (24), op. 87",
@@ -995,7 +995,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "07-13": {
         "name": "Symphony #7 in C, op. 60 \"Leningrad\"",
         "author": "Shostakovich",
-        "link": "https://www.youtube.com/watch?v=favVFUe6igc"
+        "link": "https://www.youtube.com/watch?v=GB3zR_X25UU"
     },
     "07-14": {
         "name": "La traviata",
@@ -1065,7 +1065,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "07-27": {
         "name": "Symphony #4 in C minor, op. 43",
         "author": "Shostakovich",
-        "link": "https://www.youtube.com/watch?v=-Us8ElJ3yUY"
+        "link": "https://www.youtube.com/watch?v=KzmcnMrRHR4"
     },
     "07-28": {
         "name": "La Boh\u00e8me",
@@ -1095,7 +1095,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "08-02": {
         "name": "Symphony #8 in C minor, op. 65",
         "author": "Shostakovich",
-        "link": "https://www.youtube.com/watch?v=9jFesZ-jxRw"
+        "link": "https://www.youtube.com/watch?v=9CaXNxh8msw"
     },
     "08-03": {
         "name": "Romeo and Juliet Fantasy-Overture",
@@ -1280,7 +1280,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "09-08": {
         "name": "English Suites, BWV 806-811",
         "author": "Bach",
-        "link": "https://www.youtube.com/watch?v=rJq80yxHeAQ"
+        "link": "https://www.youtube.com/watch?v=55UY3crQp4o"
     },
     "09-09": {
         "name": "Symphony #5 in C minor, op. 67",
@@ -1485,7 +1485,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "10-19": {
         "name": "Symphony #6 'Path\u00e9tique' in B minor, op. 74",
         "author": "Tchaikovsky",
-        "link": "https://www.youtube.com/watch?v=uZmLx4w2VHo"
+        "link": "https://www.youtube.com/watch?v=SVnF3x44rvU"
     },
     "10-20": {
         "name": "Orchestral Suites, BWV 1066-1069",
@@ -1540,7 +1540,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "10-30": {
         "name": "Symphony #13 in B-flat minor, op. 113 \"Babi Yar\"",
         "author": "Shostakovich",
-        "link": "https://www.youtube.com/watch?v=acDDPoopgvw"
+        "link": "https://www.youtube.com/watch?v=V1FMoQ8Aylg"
     },
     "10-31": {
         "name": "Serenade for Strings in E, op. 22",
@@ -1695,12 +1695,12 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "11-30": {
         "name": "Symphony #10 in E minor, op. 93",
         "author": "Shostakovich",
-        "link": "https://www.youtube.com/watch?v=gQU9hNxImxA"
+        "link": "https://www.youtube.com/watch?v=UpPip-YjzVc"
     },
     "12-01": {
         "name": "Klavierst\u00fccke (Piano Pieces, 6), op. 118",
         "author": "Brahms",
-        "link": "https://www.youtube.com/watch?v=XnUuGRoL97o"
+        "link": "https://www.youtube.com/watch?v=qGqeYERyPVs"
     },
     "12-02": {
         "name": "Harpsichord Concerto #1 in D minor, BWV 1052",
@@ -1780,7 +1780,7 @@ const embeddedMusicData: Record<string, MusicPiece> = {
     "12-17": {
         "name": "String Quartet #12 in F, op. 96 'American'",
         "author": "Dvo\u0159\u00e1k",
-        "link": "https://www.youtube.com/watch?v=DxtAHpYIXdU"
+        "link": "https://www.youtube.com/watch?v=PzrFW8DbaLc"
     },
     "12-18": {
         "name": "Symphony #5 in E minor, op. 64",

@@ -1,0 +1,12 @@
+{
+  "build": "npm run build passed",
+  "all_calendar_keys_preserved": 366,
+  "all_work_title_and_creator_pairs_preserved": 366,
+  "feb29": "unchanged",
+  "urls_changed": 16,
+  "retained_original_urls": 350,
+  "final_links_with_successful_metadata_checks": 366,
+  "runtime_artifact": "Identical to production 1.0.0 main.js except the 16 verified URL substitutions.",
+  "git_diff_check": "passed",
+  "release_published_at_audit_time": false
+}
