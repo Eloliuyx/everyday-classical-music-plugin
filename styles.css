@@ -1,14 +1,39 @@
-.ko-fi-button-container {
+.setting-item.everyday-classical-music-support {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.everyday-classical-music-support .setting-item-info {
+    display: none;
+}
+
+.everyday-classical-music-support .setting-item-control {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.everyday-classical-music-support .ko-fi-button-container {
     text-align: center;
     margin-top: 20px;
 }
 
-.ko-fi-button {
-    background-color: #FFD6C0;
-    color: #343434;
+.everyday-classical-music-support .ko-fi-button {
+    background: transparent;
+    color: var(--text-normal);
     border: none;
+    box-shadow: none;
     padding: 10px 20px;
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
+}
+
+.everyday-classical-music-support .ko-fi-button:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 2px;
 }

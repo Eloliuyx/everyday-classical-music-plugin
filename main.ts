@@ -2130,6 +2130,8 @@ class EverydayClassicalMusicSettingTab extends PluginSettingTab {
     }
 
     private renderSupport(setting: Setting): void {
+        // Keep the searchable definition, but display the support link as a centered footer.
+        setting.setClass('everyday-classical-music-support');
         const buttonDiv = setting.controlEl.createDiv({ cls: 'ko-fi-button-container' });
         const koFiButton = buttonDiv.createEl('button', { text: 'Feed the Markhor 🦌🪽', cls: 'ko-fi-button' });
         koFiButton.onclick = () => {

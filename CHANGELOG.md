@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Restore the centered, standalone Feed the Markhor footer shown in the original settings page, without the additional support heading or description. Keep settings search, the donation link, and keyboard focus visibility.
+
 ## 1.1.1 — 2026-09-23
 
 - Add searchable setting definitions for Obsidian 1.13+, with English and Chinese search aliases. Keep the legacy settings page for older versions; both use the same controls and actions. Search indexing does not read or write notes.

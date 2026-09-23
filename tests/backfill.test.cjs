@@ -73,6 +73,7 @@ function harness({ notes = {}, saved = {}, loadError = null, loadPromise = null,
             container.rows.push(this);
             this.controlEl = createContainer();
         }
+        setClass(name) { this.className = name; return this; }
         setName(name) { this.name = name; return this; }
         setDesc(description) { this.description = description; return this; }
         addButton(callback) { this.button = new Button(); callback(this.button); return this; }
