@@ -1,6 +1,6 @@
 {
 	"name": "everyday-classical-music-plugin",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "A different classical music piece each day in your Obsidian daily notes.",
 	"main": "main.js",
 	"scripts": {

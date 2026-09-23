@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0 — 2026-09-23
+## 1.1.1 — 2026-09-23
 
 - Add searchable setting definitions for Obsidian 1.13+, with English and Chinese search aliases. Keep the legacy settings page for older versions; both use the same controls and actions. Search indexing does not read or write notes.
 - Pin the development-only Obsidian API definitions to 1.13.1 to type-check the new settings interface. The plugin’s minimum app version is unchanged.
@@ -15,6 +15,8 @@
 - Add a contribution guide, a disposable test-vault generator, and automated lint/test/build checks.
 - Build tagged releases in GitHub Actions and attach provenance attestations to all three installable files. Releases are created as drafts for review before publication.
 - Keep all 366 musical works, date mappings, and URLs unchanged from 1.0.1.
+
+The 1.1.0 tag was an unpublished packaging attempt. Its release upload failed; 1.1.1 corrects draft-release lookup and contains the maintenance changes above.
 
 ## 1.0.1 — 2026-09-23
 

@@ -68,8 +68,9 @@ fs.appendFileSync(process.env.TEST_LOG, JSON.stringify(args) + '\\n');
 if (args[0] === 'api') {
     const state = process.env.TEST_SCENARIO;
     if (state === 'unavailable') { console.error('HTTP 503'); process.exit(1); }
-    if (state === 'missing' && !fs.existsSync(process.env.TEST_CREATED)) { console.error('HTTP 404'); process.exit(1); }
-    console.log(JSON.stringify({ draft: state !== 'published' }));
+    if (!args.includes('repos/test/repo/releases?per_page=100') || !args.includes('--paginate') || !args.includes('--slurp')) { console.error('HTTP 404'); process.exit(1); }
+    if (state === 'missing' && !fs.existsSync(process.env.TEST_CREATED)) { console.log('[[]]'); process.exit(0); }
+    console.log(JSON.stringify([[], [{ tag_name: '1.1.0', draft: state !== 'published' }]]));
 } else if (args[0] === 'release' && args[1] === 'create') {
     fs.writeFileSync(process.env.TEST_CREATED, 'yes');
 }
