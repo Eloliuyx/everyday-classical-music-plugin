@@ -1,11 +1,10 @@
 {
 	"id": "everyday-classical-music",
 	"name": "Everyday Classical Music",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"minAppVersion": "0.9.12",
 	"description": "Display a different piece of classical music each day with a YouTube link in your daily note.",
-	"author": "the flying markhor",  
-	"authorUrl": "https://flyingmarkhor.com",
+	"author": "the flying markhor",
+	"authorUrl": "https://github.com/Eloliuyx",
 	"isDesktopOnly": false
 }
-            

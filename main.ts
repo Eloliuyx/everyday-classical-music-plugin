@@ -1,15 +1,13 @@
-import { App, Plugin, PluginSettingTab, Setting, TFile, Notice } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting, TFile, Notice, ButtonComponent } from 'obsidian';
 import { moment } from "obsidian";
 
 // Plugin settings interface
 interface EverydayClassicalMusicSettings {
-    backfillExistingNotes: boolean;
     removeLinksBeforeDate: string;
 }
 
 // Default settings
 const DEFAULT_SETTINGS: EverydayClassicalMusicSettings = {
-    backfillExistingNotes: false,
     removeLinksBeforeDate: ''
 }
 
@@ -1856,90 +1854,160 @@ const embeddedMusicData: Record<string, MusicPiece> = {
 
 // Main plugin class
 export default class EverydayClassicalMusicPlugin extends Plugin {
-    settings: EverydayClassicalMusicSettings;
-    musicData: Record<string, MusicPiece> = {};
+    settings: EverydayClassicalMusicSettings = { ...DEFAULT_SETTINGS };
+    musicData: Record<string, MusicPiece> = embeddedMusicData;
     pluginEnabledTimestamp: number;
+    backfillInProgress = false;
+    private isUnloaded = false;
+    private updatingFiles = new Set<string>();
 
-    async onload() {
-        // Load settings
+    onload(): void {
+        this.isUnloaded = false;
+        this.initialize().catch(error => {
+            this.reportError('Could not load settings. Try disabling and enabling the plugin.', error);
+        });
+    }
+
+    onunload(): void {
+        this.isUnloaded = true;
+    }
+
+    private async initialize(): Promise<void> {
         await this.loadSettings();
+        if (this.isUnloaded) return;
 
-        // Load JSON data from the embedded data
-        this.musicData = embeddedMusicData;
-
-        // Get the current timestamp when the plugin is enabled
-        this.pluginEnabledTimestamp = Date.now();
-    
-
-        // Register event to modify daily note on creation
-        this.registerEvent(this.app.vault.on('create', this.onFileCreate.bind(this)));
-
-        if (this.settings.backfillExistingNotes) {
-            this.backfillExistingNotes();
-        }
-
-        // Add settings tab
         this.addSettingTab(new EverydayClassicalMusicSettingTab(this.app, this));
+
+        // Obsidian emits create events for existing files while opening a vault.
+        // Listen only after that initial load, and never run backfill at startup.
+        this.app.workspace.onLayoutReady(() => {
+            if (this.isUnloaded) return;
+            this.pluginEnabledTimestamp = Date.now();
+            this.registerEvent(this.app.vault.on('create', file => {
+                if (file instanceof TFile) {
+                    this.onFileCreate(file).catch(error => {
+                        this.reportError(`Could not add music to ${file.path}.`, error);
+                    });
+                }
+            }));
+        });
     }
 
-
-    async loadSettings() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    async loadSettings(): Promise<void> {
+        const saved = await this.loadData() as Partial<EverydayClassicalMusicSettings> | null;
+        // Deliberately ignore the old persistent backfillExistingNotes flag.
+        // Loading settings must not write notes or trigger a settings migration.
+        this.settings = {
+            removeLinksBeforeDate: typeof saved?.removeLinksBeforeDate === 'string'
+                ? saved.removeLinksBeforeDate
+                : DEFAULT_SETTINGS.removeLinksBeforeDate
+        };
     }
 
-    async saveSettings() {
+    async saveSettings(): Promise<void> {
         await this.saveData(this.settings);
     }
 
-    async onFileCreate(file: TFile) {
-        const fileCreationTime = moment(file.stat.ctime).valueOf();
-        if (this.isDailyNoteFile(file) && fileCreationTime >= this.pluginEnabledTimestamp) {
+    reportError(message: string, error: unknown): void {
+        console.error('Everyday Classical Music:', message, error);
+        if (!this.isUnloaded) new Notice(message);
+    }
+
+    async onFileCreate(file: TFile): Promise<void> {
+        if (!this.isUnloaded && this.isDailyNoteFile(file)
+            && file.stat.ctime >= this.pluginEnabledTimestamp) {
             await this.addMusicLinkToFile(file);
         }
     }
 
-    async backfillExistingNotes() {
-        const files = this.app.vault.getMarkdownFiles();
-        for (const file of files) {
-            if (this.isDailyNoteFile(file)) {
-                await this.addMusicLinkToFile(file);
+    async backfillExistingNotes(): Promise<void> {
+        if (this.isUnloaded) return;
+        if (this.backfillInProgress) {
+            new Notice('Backfill is already running.');
+            return;
+        }
+
+        this.backfillInProgress = true;
+        let added = 0;
+        let skipped = 0;
+        let failed = 0;
+        try {
+            const files = this.app.vault.getMarkdownFiles();
+            for (const file of files) {
+                if (this.isUnloaded) break;
+                if (!this.isDailyNoteFile(file)) continue;
+                try {
+                    if (await this.addMusicLinkToFile(file)) added++;
+                    else skipped++;
+                } catch (error) {
+                    failed++;
+                    console.error(`Everyday Classical Music: could not backfill ${file.path}.`, error);
+                }
             }
+            if (!this.isUnloaded) {
+                const summary = `Backfill finished: ${added} added, ${skipped} skipped, ${failed} failed.`;
+                new Notice(failed > 0 ? `${summary} You can retry; existing music blocks are skipped.` : summary);
+            }
+        } finally {
+            this.backfillInProgress = false;
         }
     }
 
-    async addMusicLinkToFile(file: TFile) {
-        const date = file.basename;
-        const monthDay = date.slice(5); // Get MM-DD part
-        const musicPiece = this.musicData[monthDay];
+    async addMusicLinkToFile(file: TFile): Promise<boolean> {
+        const musicPiece = this.musicData[file.basename.slice(5)];
+        const path = file.path;
+        if (!musicPiece || this.isUnloaded || this.updatingFiles.has(path)) return false;
 
-        if (musicPiece) {
+        // A newly created note may also be found by a manual backfill.
+        this.updatingFiles.add(path);
+        try {
             const content = await this.app.vault.read(file);
+            if (this.isUnloaded) return false;
 
-            // Check if the note already contains the music link block
-            if (content.includes('> [!tip] Daily Classical Music') || content.includes('[!info] Daily Classical Music') || content.includes('[!quote] Daily Classical Music')) {
-                return;
+            // Keep all previously supported callout styles, without rewriting old links.
+            if (content.includes('> [!tip] Daily Classical Music')
+                || content.includes('[!info] Daily Classical Music')
+                || content.includes('[!quote] Daily Classical Music')) {
+                return false;
             }
 
+            const eol = content.includes('\r\n') ? '\r\n' : '\n';
             const musicLink = `[${musicPiece.name} by ${musicPiece.author}](${musicPiece.link})`;
-            const quoteBlock = `> [!tip] Daily Classical Music\n> ${musicLink}\n`;
+            const quoteBlock = `> [!tip] Daily Classical Music${eol}> ${musicLink}${eol}`;
+            let insertionPoint = content.startsWith('\uFEFF') ? 1 : 0;
+            const frontmatterStart = /^\uFEFF?---[ \t]*\r?\n/.exec(content);
+            if (frontmatterStart) {
+                const remainder = content.slice(frontmatterStart[0].length);
+                const frontmatterEnd = /^---[ \t]*(?:\r?\n|$)/m.exec(remainder);
+                if (!frontmatterEnd) {
+                    throw new Error('The note starts with an unclosed frontmatter block.');
+                }
+                insertionPoint = frontmatterStart[0].length + frontmatterEnd.index + frontmatterEnd[0].length;
+            }
 
-            const propertyFieldsEndIndex = content.indexOf('---', content.indexOf('---') + 1) + 3;
-            const newContent = `${content.slice(0, propertyFieldsEndIndex)}\n\n${quoteBlock}\n${content.slice(propertyFieldsEndIndex).trim()}`;
-
+            let prefix = content.slice(0, insertionPoint);
+            if (frontmatterStart) prefix += prefix.endsWith('\n') ? eol : `${eol}${eol}`;
+            // Preserve the existing body verbatim, including leading/trailing whitespace.
+            const newContent = `${prefix}${quoteBlock}${eol}${content.slice(insertionPoint)}`;
             await this.app.vault.modify(file, newContent);
+            return true;
+        } finally {
+            this.updatingFiles.delete(path);
         }
     }
 
-    async removeLinksBeforeDate(cutoffDate: string) {
+    async removeLinksBeforeDate(cutoffDate: string): Promise<void> {
         const files = this.app.vault.getMarkdownFiles();
         const cutoff = moment(cutoffDate, 'YYYY-MM-DD');
 
         for (const file of files) {
+            if (this.isUnloaded) return;
             if (this.isDailyNoteFile(file)) {
                 const fileDate = moment(file.basename, 'YYYY-MM-DD', true);
                 if (fileDate.isValid() && fileDate.isBefore(cutoff)) {
                     let content = await this.app.vault.read(file);
-                    const pattern = /> \[!tip\] Daily Classical Music\n> .*?\n\n/;
+                    if (this.isUnloaded) return;
+                    const pattern = /> \[!tip\] Daily Classical Music\r?\n> .*?\r?\n\r?\n/;
                     content = content.replace(pattern, '');
                     await this.app.vault.modify(file, content);
                 }
@@ -1948,68 +2016,122 @@ export default class EverydayClassicalMusicPlugin extends Plugin {
     }
 
     isDailyNoteFile(file: TFile): boolean {
-        const dailyNoteFormat = 'YYYY-MM-DD';  // Adjust if your daily note format is different
-        return moment(file.basename, dailyNoteFormat, true).isValid();
+        return file.extension === 'md' && moment(file.basename, 'YYYY-MM-DD', true).isValid();
     }
 }
 
 // Plugin settings tab
 class EverydayClassicalMusicSettingTab extends PluginSettingTab {
     plugin: EverydayClassicalMusicPlugin;
+    private backfillButton: ButtonComponent | null = null;
 
     constructor(app: App, plugin: EverydayClassicalMusicPlugin) {
         super(app, plugin);
         this.plugin = plugin;
     }
 
+    // Obsidian 1.13+ indexes these names and aliases without rendering controls.
+    // Keep this method free of side effects: indexing must never write notes.
+    getSettingDefinitions() {
+        return [
+            {
+                name: 'Backfill existing notes',
+                desc: 'Run once to add music to Markdown notes named YYYY-MM-DD throughout this vault. Existing music blocks are skipped. This never runs automatically.',
+                aliases: ['Backfill now', 'music', 'daily notes', '补填', '补填音乐', '旧日记'],
+                render: (setting: Setting): void => this.renderBackfill(setting)
+            },
+            {
+                name: 'Remove links before date',
+                desc: 'Select a date to remove all the links added before this date',
+                aliases: ['cutoff date', 'music', '日期', '截止日期', '删除音乐'],
+                render: (setting: Setting): void => this.renderCutoffDate(setting)
+            },
+            {
+                name: 'Remove music links',
+                desc: 'Remove music blocks from notes dated before the selected cutoff date.',
+                aliases: ['Remove links', 'cleanup', '删除音乐', '删除链接', '清理'],
+                render: (setting: Setting): void => this.renderRemoveLinks(setting)
+            },
+            {
+                name: 'Support development',
+                desc: 'Open the author’s Ko-fi page to support the plugin.',
+                aliases: ['Feed the Markhor', 'Ko-fi', 'donate', '赞助', '支持开发'],
+                render: (setting: Setting): void => this.renderSupport(setting)
+            }
+        ];
+    }
+
+    // Older Obsidian versions use display(). Reuse the same definitions and
+    // control renderers so both interfaces keep identical behavior.
     display(): void {
-        const { containerEl } = this;
+        this.containerEl.empty();
+        for (const definition of this.getSettingDefinitions()) {
+            const setting = new Setting(this.containerEl)
+                .setName(definition.name)
+                .setDesc(definition.desc);
+            definition.render(setting);
+        }
+    }
 
-        containerEl.empty();
+    private async runBackfill(): Promise<void> {
+        this.backfillButton?.setDisabled(true).setButtonText('Backfilling…');
+        try {
+            await this.plugin.backfillExistingNotes();
+        } finally {
+            this.backfillButton?.setDisabled(false).setButtonText('Backfill now');
+        }
+    }
 
-        new Setting(containerEl)
-            .setName('Backfill existing notes')
-            .setDesc('If enabled, backfill all existing daily notes with classical music suggestions')
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.backfillExistingNotes)
-                .onChange(async (value) => {
-                    this.plugin.settings.backfillExistingNotes = value;
-                    await this.plugin.saveSettings();
-                    if (value) {
-                        await this.plugin.backfillExistingNotes();
-                    }
-                }));
-
-        new Setting(containerEl)
-            .setName('Remove links before date')
-            .setDesc('Select a date to remove all the links added before this date')
-            .addText(text => text
-                .setPlaceholder('YYYY-MM-DD')
-                .setValue(this.plugin.settings.removeLinksBeforeDate)
-                .onChange(async (value) => {
-                    this.plugin.settings.removeLinksBeforeDate = value;
-                    await this.plugin.saveSettings();
-                }));
-
-        new Setting(containerEl)
-            .addButton(button => {
-                button.setButtonText('Remove links')
-                    .setCta()
-                    .onClick(async () => {
-                        const cutoffDate = this.plugin.settings.removeLinksBeforeDate;
-                        if (moment(cutoffDate, 'YYYY-MM-DD', true).isValid()) {
-                            await this.plugin.removeLinksBeforeDate(cutoffDate);
-                        } else {
-                            new Notice('Please enter a valid date in YYYY-MM-DD format');
-                        }
+    private renderBackfill(setting: Setting): void {
+        setting.addButton(button => {
+            this.backfillButton = button;
+            button.setButtonText(this.plugin.backfillInProgress ? 'Backfilling…' : 'Backfill now')
+                .setDisabled(this.plugin.backfillInProgress)
+                .onClick(() => {
+                    this.runBackfill().catch(error => {
+                        this.plugin.reportError('Backfill stopped unexpectedly. Some notes may already have been updated; you can retry.', error);
                     });
-            });
+                });
+        });
+    }
 
-        // Add "Feed the Markhor" button
-        const buttonDiv = containerEl.createDiv({ cls: 'ko-fi-button-container' });
+    private renderCutoffDate(setting: Setting): void {
+        setting.addText(text => text
+            .setPlaceholder('YYYY-MM-DD')
+            .setValue(this.plugin.settings.removeLinksBeforeDate)
+            .onChange(value => {
+                this.plugin.settings.removeLinksBeforeDate = value;
+                this.plugin.saveSettings().catch(error => {
+                    this.plugin.reportError('Could not save the date. Please try again.', error);
+                });
+            }));
+    }
 
+    private renderRemoveLinks(setting: Setting): void {
+        setting.addButton(button => {
+            button.setButtonText('Remove links')
+                .setCta()
+                .onClick(async () => {
+                    const cutoffDate = this.plugin.settings.removeLinksBeforeDate;
+                    if (!moment(cutoffDate, 'YYYY-MM-DD', true).isValid()) {
+                        new Notice('Please enter a valid date in YYYY-MM-DD format');
+                        return;
+                    }
+                    button.setDisabled(true);
+                    try {
+                        await this.plugin.removeLinksBeforeDate(cutoffDate);
+                    } catch (error) {
+                        this.plugin.reportError('Could not finish removing links. Some notes may already have been updated.', error);
+                    } finally {
+                        button.setDisabled(false);
+                    }
+                });
+        });
+    }
+
+    private renderSupport(setting: Setting): void {
+        const buttonDiv = setting.controlEl.createDiv({ cls: 'ko-fi-button-container' });
         const koFiButton = buttonDiv.createEl('button', { text: 'Feed the Markhor 🦌🪽', cls: 'ko-fi-button' });
-
         koFiButton.onclick = () => {
             window.open('https://ko-fi.com/flyingmarkhor', '_blank');
         };
