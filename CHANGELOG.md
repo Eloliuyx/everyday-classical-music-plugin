@@ -1,10 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.1.3 — 2026-09-23
 
+- Place **Feed the Markhor** in a separate, unboxed footer centered below the gray settings area in Obsidian 1.13+. Keep the standalone footer on older versions.
 - Underline **Feed the Markhor** while hovered or pressed.
+- Simplify the plugin details and keep the public description entirely in English. Move development and release-verification instructions to the contributor guide.
 
-- Place **Feed the Markhor** in a separate, unboxed footer below the gray settings area in Obsidian 1.13+. Keep the original standalone footer on older versions.
+Validation: 40 automated tests, lint, and production build pass. The built main.js and styles.css match the separate test-vault preview byte for byte. All 366 music mappings and URLs, note-writing behavior, and the minimum Obsidian version are unchanged from 1.1.2.
 
 ## 1.1.2 — 2026-09-23
 
